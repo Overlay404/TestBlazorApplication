@@ -13,7 +13,7 @@
             <div class="d-flex flex-row">
                 <h5 class="m-md-2">
                     Год:
-                    <select class="form-select w-100" @bind=@selectedYear>
+                    <select class="form-select w-100" @onchange=UpdateChangedYears>
                             @for(int i = currentYear; i > currentYear - 5; i--)
                             {   
                             <option value="@i">@i</option>
@@ -23,14 +23,13 @@
 
                 <h5 class="m-md-2">
                     Страна:
-                    <select class="form-select" @bind=@(selectedCountry)>
+                    <select class="form-select" @onchange=UpdateChangedCoutries>
                         @foreach(var item in countries)
                         {
                             <option value="@item.CountryCode">@item.Name</option>
                         }
                     </select>
                 </h5>
-                <button type="button" class="btn btn-dark align-self-end m-2" @onclick="@(() => checkHolidays(selectedYear, selectedCountry))">Посмотреть праздники</button>
             </div>
 
             <table class="table">
@@ -46,6 +45,7 @@
                         <th scope="col">Типы</th>
                     </tr>
                 </thead>
+
                 @foreach(var item in holidaysList)
                 {   
                 <tbody>
@@ -70,10 +70,20 @@
     private static int currentYear = DateTime.Now.Year;
     int selectedYear { get; set; } = currentYear;
     string? selectedCountry { get; set; } = countries.FirstOrDefault()?.CountryCode;
-
     private List<Holiday> holidaysList = new List<Holiday>();
-
     static List<Country> countries = Request.GetDataFromHolidayApi<List<Country>>("https://date.nager.at/api/v3/AvailableCountries");
+
+    private void UpdateChangedCoutries(ChangeEventArgs args)
+    {
+        selectedCountry = args.Value.ToString();
+        checkHolidays(selectedYear, selectedCountry);
+    }
+    
+    private void UpdateChangedYears(ChangeEventArgs args)
+    {
+        selectedYear = Convert.ToInt32(args.Value);
+        checkHolidays(selectedYear, selectedCountry);
+    }
 
     private void checkHolidays(int year, string countryCode)
     {
