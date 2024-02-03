@@ -1,0 +1,105 @@
+﻿@page "/"
+@rendermode InteractiveServer
+@using Newtonsoft.Json
+@using System.Net
+@using TestBlazorApplication.Model
+
+<h3>CheckHolidays</h3>
+
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col">
+            <div class="d-flex flex-row">
+                <h5 class="m-md-2">
+                    Год:
+                    <select class="form-select w-100" @bind=@selectedYear>
+                            @for(int i = currentYear; i > currentYear - 5; i--)
+                            {   
+                            <option value="@i">@i</option>
+                            }
+                        </select>
+                </h5>
+
+                <h5 class="m-md-2">
+                    Страна:
+                    <select class="form-select" @bind=@(selectedCountry)>
+                        @foreach(var item in countries)
+                        {
+                            <option value="@item.CountryCode">@item.Name</option>
+                        }
+                    </select>
+                </h5>
+                <button type="button" class="btn btn-dark align-self-end m-2" @onclick="@(() => checkHolidays(selectedYear, selectedCountry))">Посмотреть праздники</button>
+            </div>
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Название праздника</th>
+                        <th scope="col">Локальное название</th>
+                        <th scope="col">Дата праздника</th>
+                        <th scope="col">Код страны</th>
+                        <th scope="col">Фиксированный</th>
+                        <th scope="col">Глобальный</th>
+                        <th scope="col">Год появления</th>
+                        <th scope="col">Типы</th>
+                    </tr>
+                </thead>
+                @foreach(var item in holidaysList)
+                {   
+                <tbody>
+                    <tr>
+                        <td>@item.Name</td>
+                        <td>@item.LocalName</td>
+                        <td>@item.Date.ToString("d MMMM")</td>
+                        <td>@item.CountryCode</td>
+                        <td>@(@item.Fixed ? "Да" : "Нет")</td>
+                        <td>@(@item.Global ? "Да" : "Нет")</td>
+                        <td>@item.LaunchYear</td>
+                        <td>@(string.Join(" ", @item.Types ?? new List<string>()))</td>
+                    </tr>
+                </tbody>
+                }
+            </table>
+        </div>
+    </div>
+</div>
+
+@code {
+    private static int currentYear = DateTime.Now.Year;
+    int selectedYear { get; set; } = currentYear;
+    string? selectedCountry { get; set; } = countries.FirstOrDefault()?.CountryCode;
+
+    private List<Holiday> holidaysList = new List<Holiday>();
+
+    static List<Country> countries = Request.GetDataFromHolidayApi<List<Country>>("https://date.nager.at/api/v3/AvailableCountries");
+
+    private void checkHolidays(int year, string countryCode)
+    {
+        if (countryCode == null)
+        {
+            return;
+        }
+
+        holidaysList = Request.GetDataFromHolidayApi<List<Holiday>>($"https://date.nager.at/api/v3/publicholidays/{year}/{countryCode}");
+    }
+
+
+    public class Request()
+    {
+        public static T GetDataFromHolidayApi<T>(string url) where T : new()
+        {
+            using (var httpClient = new HttpClient())
+            {
+                var json = String.Empty;
+                try
+                {
+                    json = httpClient.GetStringAsync(url).Result;
+                }
+                catch{}
+                    return string.IsNullOrEmpty(json) ? new T() : JsonConvert.DeserializeObject<T>(json);
+            }
+        }
+    }
+}

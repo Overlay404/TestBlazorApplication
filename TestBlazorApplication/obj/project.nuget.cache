@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "6P2XJf+mIlB52O47fz/yaNgFOFiJw9Jc4HsQBtzbiaJhj49dJIr5QpgyFRL0G90YJYmHm3vD3RMU63hc/+CxfQ==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\denis\\source\\repos\\TestBlazorApplication\\TestBlazorApplication\\TestBlazorApplication.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\denis\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}
